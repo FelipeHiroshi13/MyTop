@@ -1,21 +1,42 @@
 # Name of the project
-PROJ_NAME = mytop
+PROJ_NAME=mytop
 
-#Complier and linker
-CC = gcc
+# .c files
+C_SOURCE=$(wildcard *.c)
 
-#Flafs for compiler
+# .h files
+H_SOURCE=$(wildcard *.h)
 
-CC_FLAGS = -lncurses
+# Object files
+OBJ=$(C_SOURCE:.c=.o)
+
+# Compiler
+CC=gcc
+
+# Flags for compiler
+CC_FLAGS=-c         \
+         -W         \
+         -Wall     	\
+		 -pedantic 
 
 
-all: $(PROJ_NAME) image
+NCURSES = -lncurses
+#
+# Compilation and linking
+#
+all: $(PROJ_NAME) run
 
-$(PROJ_NAME):
-	$(CC) -o main.o main.c $< $(CC_FLAGS)
+$(PROJ_NAME): $(OBJ)
+	$(CC) -o $@ $^ -lncurses
 
-image:
-	./main.o
+main.o: main.c $(H_SOURCE)
+	$(CC) -o $@ $< $(CC_FLAGS) 
+
+%.o: %.c %.h
+	$(CC) -o $@ $< $(CC_FLAGS) 
+
+run: 
+	./$(PROJ_NAME)
 
 clean:
-	rm -rf *.o *~ mytop
+	rm -rf *.o $(PROJ_NAME) *~

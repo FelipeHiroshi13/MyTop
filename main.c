@@ -1,17 +1,10 @@
-#include <ncurses.h>
+#include<stdio.h>
+#include "interface.h"
 
 
 int main (void){
 
-    initscr();
-
-    printw("Hello");
-
-    refresh();
-
-    getch();
-
-    endwin();
+    interface();
 
     return 0;
 }
