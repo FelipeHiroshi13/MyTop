@@ -6,6 +6,16 @@
 #define COR_MENU 2  
 #define CURSOR   3
 
+typedef struct ProcessInfo
+{
+  int processID;
+  char userName[99];
+  int priority;
+  char state;
+  int cpuPercentage;
+  int startTime;
+  char commandLine[99];
+}ProcessInfo;
 
 void header(){
     printw("MyTop\n");

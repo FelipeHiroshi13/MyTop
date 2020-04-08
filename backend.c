@@ -56,7 +56,7 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
 }
 
-void ListAllProcessesDirectory()
+void listAllProcessesDirectory()
 {
     DIR *pDir;
     struct dirent *entry;
