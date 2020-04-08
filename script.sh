@@ -15,7 +15,7 @@ do
 	## To verify if is a PID and if the file status exists
 	if [[ ${i} =~ ^([0-9]+)$ ]] && [ -e $path$i'/status' ];
 	then
-		$PATH_TRAB/./mytop $PATHPID$i'/status'
+		$PATH_TRAB/./mytop $PATHPID$i'/stat' $PATHPID'uptime'
 	fi
 done
 
