@@ -37,6 +37,8 @@ main.o: main.c $(H_SOURCE)
 
 run: 
 	./$(PROJ_NAME)
+	#chmod 777 script.sh
+	#./script.sh
 
 clean:
 	rm -rf *.o $(PROJ_NAME) *~

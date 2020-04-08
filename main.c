@@ -6,8 +6,9 @@
 typedef char String[20];
 
 int main (int argc, char **argv){
-	FILE *f;
-	String pathFile;
+	FILE *fs, *fu; 		// pointers fileStat, fileUptime
+	String pathStat;	
+	String pathUptime;
 	
 	listAllProcessesDirectory();
     interface();
@@ -16,16 +17,31 @@ int main (int argc, char **argv){
 		printf("Error 1\n");
 	}
 	else{
-		strcpy(pathFile, (argv[1]));
+		strcpy(pathStat, (argv[1]));
+		strcpy(pathUptime, (argv[2]));
 		
-		f = fopen(pathFile, "r");
+		fs = fopen(pathStat, "r");
 		
-		if(f == NULL){
+		if(fs == NULL){
 			printf("Error 2\n");
 		}
 		else{
 			
-			fclose(f);	
+			// PID (find in stat[0])
+			
+			// USER
+			
+			// PR 
+			
+			// S (find in stat[1])
+			
+			// %CPU (this section need some calculus with stat[14:17, 22] and uptime[0])
+			
+			// TIME ( idem %cpu )
+			
+			// COMMAND (find in stat[2])
+			
+			fclose(fs);	
 		}
 	}
 
