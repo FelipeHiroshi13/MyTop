@@ -56,12 +56,13 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
 }
 
-void listAllProcessesDirectory()
+struct ProcessInfo** listAllProcessesDirectory()
 {
     DIR *pDir;
     struct dirent *entry;
     struct ProcessInfo* processInfoArray[99999];
-    
+    struct ProceInfo** ptr = &processInfoArray[0];
+
     char directoryName[256] = "/proc";
     char statFileName[256] = "/stat";
     
@@ -75,11 +76,12 @@ void listAllProcessesDirectory()
         processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, directoryName, statFileName, entry);
         //printf("%s", directoryName);
         //printf("%s", entry->d_name);
+        printf("-->%d\n", processInfoArray[processInfoArrayIndex]->processID);
         processInfoArrayIndex++;
-
         //printf("\n");
       }
     }
-    printf("%d", processInfoArray[2]->processID);
+    
+    return ptr;
 }
 

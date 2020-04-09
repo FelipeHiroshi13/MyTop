@@ -24,12 +24,12 @@ void header(){
 	p = (ProcessInfo *)calloc(1, sizeof(ProcessInfo));
 	
 	p->processID = 5;
-	p->userName = "Alguém";
+	strcpy(p->userName, "Felipe");
 	p->priority = 8;
 	p->state = 'S';
 	p->cpuPercentage = 10;
 	p->startTime = 20;
-	p->commandLine = "teste123";
+	strcpy(p->commandLine, "teste");
 	
 	
     printw("MyTop\n");
@@ -52,11 +52,18 @@ void background(){
     bkgd (COLOR_PAIR(FUNDO));
 }
 
-void interface(){
+void showProcess(struct ProcessInfo** processInfo){
+    for(int i = 0; i < 15; i++){
+        printw("%d\n", processInfo[i]->processID);
+    }
+}
+
+void interface(struct ProcessInfo** processInfo){
     initscr();
     background();
     header();
-    
+
+    showProcess(processInfo);
 
     refresh();
 
