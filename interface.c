@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 #include<ncurses.h>
 #include<stdlib.h>
 
@@ -18,10 +19,24 @@ typedef struct ProcessInfo
 }ProcessInfo;
 
 void header(){
+	ProcessInfo *p;
+	
+	p = (ProcessInfo *)calloc(1, sizeof(ProcessInfo));
+	
+	p->processID = 5;
+	p->userName = "Alguém";
+	p->priority = 8;
+	p->state = 'S';
+	p->cpuPercentage = 10;
+	p->startTime = 20;
+	p->commandLine = "teste123";
+	
+	
     printw("MyTop\n");
     printw("-----------------------------------------------------------\n");
     printw("PID\tUSER\tPR\tS\t%%CPU\tTIME\tCOMMAND\n");
     printw("-----------------------------------------------------------\n");
+    printw("%i\t %s\t %i\t %c\t %i\t %i\t %s\n", (*p).processID, p->userName, p->priority, p->state, p->cpuPercentage, p->startTime, p->commandLine);
 }
 
 void background(){
