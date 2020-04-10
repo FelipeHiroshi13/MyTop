@@ -12,6 +12,7 @@ OBJ=$(C_SOURCE:.c=.o)
 
 # Compiler
 CC=gcc
+BU = ./build
 
 # Flags for compiler
 CC_FLAGS=-c         \
@@ -37,6 +38,7 @@ main.o: main.c $(H_SOURCE)
 	$(CC) -o $@ $< $(CC_FLAGS) 
 
 run: ./$(PROJ_NAME)
+	./$(PROJ_NAME)
 
 clean:
 	rm -rf *.o $(PROJ_NAME) *~

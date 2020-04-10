@@ -41,7 +41,6 @@ void header(){
 
 void background(){
     start_color();   
-    //definição de pares de cores para a interface
     init_pair(FUNDO,    COLOR_GREEN,   COLOR_BLACK);
     init_pair(COR_MENU, COLOR_BLUE,   COLOR_YELLOW);
     init_pair(CURSOR,   COLOR_YELLOW, COLOR_BLUE);
@@ -53,8 +52,8 @@ void background(){
 }
 
 void showProcess(struct ProcessInfo** processInfo){
-    for(int i = 0; i < 15; i++){
-        printw("%d\t\t\t%c\n", processInfo[i]->processID, processInfo[i]->state);
+    for(int i = 0; i < 5; i++){
+        printw("%d\t\t%d\t%c\n", processInfo[i]->processID, processInfo[i]->priority, processInfo[i]->state);
     }
 }
 
@@ -62,7 +61,7 @@ void interface(struct ProcessInfo** processInfo){
     initscr();
     background();
     header();
-    printf("miau");
+    
     showProcess(processInfo);
 
     refresh();

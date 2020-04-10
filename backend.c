@@ -99,14 +99,9 @@ struct ProcessInfo** listAllProcessesDirectory()
       {
         struct ProcessInfo *processInfo = malloc (sizeof (ProcessInfo));
         processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, directoryName, statFileName, entry);
-        //printf("%s", directoryName);
-        //printf("%s", entry->d_name);
-        //printf("-->%d\n", processInfoArray[processInfoArrayIndex]->processID);
         processInfoArrayIndex++;
-        //printf("\n");
       }
     }
-    //printf("%ld\n", (processInfoArray)[3]->startTime);
     return ptr;
 }
 

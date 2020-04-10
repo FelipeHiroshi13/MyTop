@@ -18,7 +18,7 @@ int main (void){
 	struct ProcessInfo **processInfo;
 
 	processInfo = listAllProcessesDirectory();
-  printf("batat");
+
   interface(processInfo);
 
   return 0;
