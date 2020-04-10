@@ -54,7 +54,7 @@ void background(){
 
 void showProcess(struct ProcessInfo** processInfo){
     for(int i = 0; i < 15; i++){
-        printw("%d\n", processInfo[i]->processID);
+        printw("%d\t%s\n", processInfo[i]->processID, processInfo[i]->state);
     }
 }
 

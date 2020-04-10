@@ -18,10 +18,10 @@ int main (void){
 	struct ProcessInfo **processInfo;
 
 	processInfo = listAllProcessesDirectory();
+  printf("batata");
+ // interface(processInfo);
 
-    interface(processInfo);
-
-    return 0;
+  return 0;
 }
 
 	
