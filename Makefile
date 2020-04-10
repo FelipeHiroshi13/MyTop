@@ -17,6 +17,7 @@ CC=gcc
 CC_FLAGS=-c         \
          -W         \
          -Wall     	\
+		 -std=c99   \
 		 -pedantic 
 
 
@@ -35,8 +36,7 @@ main.o: main.c $(H_SOURCE)
 %.o: %.c %.h
 	$(CC) -o $@ $< $(CC_FLAGS) 
 
-run: 
-	./$(PROJ_NAME)
+run: ./$(PROJ_NAME)
 
 clean:
 	rm -rf *.o $(PROJ_NAME) *~

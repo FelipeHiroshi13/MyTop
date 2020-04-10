@@ -54,7 +54,7 @@ void background(){
 
 void showProcess(struct ProcessInfo** processInfo){
     for(int i = 0; i < 15; i++){
-        printw("%d\t%s\n", processInfo[i]->processID, processInfo[i]->state);
+        printw("%d\t\t\t%c\n", processInfo[i]->processID, processInfo[i]->state);
     }
 }
 
@@ -62,7 +62,7 @@ void interface(struct ProcessInfo** processInfo){
     initscr();
     background();
     header();
-
+    printf("miau");
     showProcess(processInfo);
 
     refresh();

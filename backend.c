@@ -62,7 +62,7 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
   fscanf(processInfoFile,"%ld", &(*processInfo).startTime);
 
-  printf("%ld\n", processInfo->startTime);
+  //printf("%ld\n", processInfo->startTime);
   
   processInfo->startTime /= sysconf(_SC_CLK_TCK);
   
@@ -81,12 +81,12 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
 }
 
-void listAllProcessesDirectory()
+struct ProcessInfo** listAllProcessesDirectory()
 {
     DIR *pDir;
     struct dirent *entry;
     struct ProcessInfo* processInfoArray[99999];
-    //struct ProceInfo** ptr = &processInfoArray[0];
+    struct ProcessInfo** ptr = &processInfoArray[0];
 
     char directoryName[256] = "/proc";
     char statFileName[256] = "/stat";
@@ -107,11 +107,6 @@ void listAllProcessesDirectory()
       }
     }
     //printf("%ld\n", (processInfoArray)[3]->startTime);
-    
+    return ptr;
 }
 
-
-// int main(void) {
-//   listAllProcessesDirectory();
-//   return 0;
-// }
