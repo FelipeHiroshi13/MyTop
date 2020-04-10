@@ -27,6 +27,76 @@ int comp (const void * a, const void * b)
   return ( processInfoB->processID - processInfoB->processID );
 }
 
+int CalculateCpuPercentage(string finalDirectoryName)
+{
+  FILE* fp = fopen("/proc/stat","r");
+  FILE* processFile = fopen(finalDirectoryName,"r");
+  char str[100];
+  char* token;
+  char trash[256];
+  long int sum = 0, lastSum = 0;
+  long int sTimeAfter = 0, sTimeBefore = 0;
+  long int finalPercentage;
+  const char d[2] = " ";
+  fgets(str,100,fp);
+  token = strtok(str,d);
+  
+  while(token != NULL)
+  {
+    token = strtok(NULL,d);
+    if(token!=NULL)
+    {
+      lastSum += atoi(token);
+    }
+  }
+
+  for (int i = 0; i < 15; i++)
+  {
+    fscanf(processFile,"%s", trash);
+  }
+
+  fscanf(processFile,"%ld", &sTimeBefore);
+  //printf("%ld\n", sTimeBefore);
+  //printf("%ld\n", lastSum);
+
+  sleep(1);
+
+  fclose(fp);
+  fclose(processFile);
+
+  fp = fopen("/proc/stat","r");
+  processFile = fopen(finalDirectoryName,"r");
+
+  fgets(str,100,fp);
+  token = strtok(str,d);
+
+  while(token != NULL)
+  {
+    token = strtok(NULL,d);
+    if(token!=NULL)
+    {
+      sum += atoi(token);
+    }
+  }
+
+  for (int i = 0; i < 14; i++)
+  {
+    fscanf(processFile,"%s", trash);
+  }
+
+  fscanf(processFile,"%ld", &sTimeAfter);
+
+  //printf("%ld\n", sTimeAfter);
+  //printf("%ld\n", sum);
+  finalPercentage = 100 * (sTimeAfter - sTimeBefore) / (sum - lastSum);
+  printf("%ld\n", finalPercentage);
+  fclose(fp);
+  fclose(processFile);
+  return finalPercentage;
+  
+  
+}
+
 struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directoryName[256], char statFileName[256], struct dirent *entry)
 {
   FILE *processInfoFile;
@@ -38,6 +108,8 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
   strcat(finalDirectoryName,entry->d_name);
   strcat(finalDirectoryName,statFileName);
   //printf("%s", finalDirectoryName);
+
+  CalculateCpuPercentage(finalDirectoryName);
  
   processInfoFile = fopen(finalDirectoryName, "r");
 
