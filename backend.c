@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include<stdio.h>
 #include <time.h> 
 
 typedef char string[256];
@@ -93,9 +94,9 @@ int CalculateCpuPercentage(string finalDirectoryName)
   fclose(fp);
   fclose(processFile);
   return finalPercentage;
-  
-  
 }
+
+
 
 struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directoryName[256], char statFileName[256], struct dirent *entry)
 {
@@ -103,30 +104,35 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
   char finalDirectoryName[256];
   char trash[256];
   char buffer;
+  char commandline[99];
+  
   strcat(finalDirectoryName, directoryName);
   strcat(finalDirectoryName, "/");
   strcat(finalDirectoryName,entry->d_name);
   strcat(finalDirectoryName,statFileName);
   //printf("%s", finalDirectoryName);
 
-  CalculateCpuPercentage(finalDirectoryName);
+  //CalculateCpuPercentage(finalDirectoryName);
  
   processInfoFile = fopen(finalDirectoryName, "r");
 
   //fseek(processInfoFile, 3, processInfoFile);
   fscanf(processInfoFile,"%d", &(*processInfo).processID);
   //printf("-->%d\n", processInfo->state);
-  fscanf(processInfoFile,"%s", (*processInfo).commandLine);
+  fscanf(processInfoFile,"%s", commandline);
+
+  strcpy((*processInfo).commandLine, commandline);
+
   fscanf(processInfoFile," %c", &(*processInfo).state);
 
-  for (int i = 0; i < 15; i++)
+  for (int i = 0; i < 14; i++)
   {
     fscanf(processInfoFile,"%s", trash);
   }
 
 
   fscanf(processInfoFile,"%d", &(*processInfo).priority);
-
+  
   for (int i = 0; i < 3; i++)
   {
     fscanf(processInfoFile,"%s", trash);
@@ -153,6 +159,7 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
 }
 
+
 struct ProcessInfo** listAllProcessesDirectory()
 {
     DIR *pDir;
@@ -174,6 +181,9 @@ struct ProcessInfo** listAllProcessesDirectory()
         processInfoArrayIndex++;
       }
     }
+
+    printf("--->%s\n", processInfoArray[0]->commandLine);
+    
     return ptr;
 }
 

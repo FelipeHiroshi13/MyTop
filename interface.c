@@ -7,6 +7,8 @@
 #define COR_MENU 2  
 #define CURSOR   3
 
+typedef char string[256];
+
 typedef struct ProcessInfo
 {
   int processID;
@@ -14,8 +16,8 @@ typedef struct ProcessInfo
   int priority;
   char state;
   int cpuPercentage;
-  int startTime;
-  char commandLine[99];
+  long int startTime;
+  string commandLine;
 }ProcessInfo;
 
 void header(){
@@ -52,16 +54,17 @@ void background(){
 }
 
 void showProcess(struct ProcessInfo** processInfo){
-    for(int i = 0; i < 5; i++){
-        printw("%d\t\t%d\t%c\n", processInfo[i]->processID, processInfo[i]->priority, processInfo[i]->state);
+   for(int i = 0; i < 5; i++){
+        printw("%d\t\t%d\t%c\t\t\t%s\n", processInfo[i]->processID, processInfo[i]->priority, processInfo[i]->state, processInfo[i]->commandLine);
     }
+
 }
 
 void interface(struct ProcessInfo** processInfo){
     initscr();
     background();
     header();
-    
+
     showProcess(processInfo);
 
     refresh();
