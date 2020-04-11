@@ -23,11 +23,7 @@ int main (void){
 
 	processInfo = listAllProcessesDirectory();
 
-  printf("-->%d\n", processInfo[0]->processID);
-
-  printf("-->%s\n", &processInfo[0]->commandLine);
-
-  interface(processInfo);
+  //interface(processInfo);
 
   return 0;
 }
