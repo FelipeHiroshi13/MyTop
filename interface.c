@@ -43,10 +43,13 @@ void background(){
 }
 
 void showProcess(struct ProcessInfo** processInfo){
-   for(int i = 0; i < 3; i++){
+    move(4,0);
+    clrtoeol();
+    for(int i = 0; i < 15; i++){
         printw("%d\t%s\t%d\t%c\t%0.2lf\t\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
                                                         processInfo[i]->cpuPercentage, processInfo[i]->commandLine);
     }
+    refresh();
 }
 
 void interface(struct ProcessInfo** processInfo){
@@ -57,8 +60,8 @@ void interface(struct ProcessInfo** processInfo){
     showProcess(processInfo);
 
     refresh();
+}
 
-    getch();
-
+void finalizeInterface(){
     endwin();
 }

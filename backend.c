@@ -206,6 +206,33 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 }
 
 /*
+* Ordena os processos de acordo com a % de CPU
+*
+*/
+
+void selection_sort_decrescente(struct ProcessInfo ** processoInfo, int tam) {
+  
+    int i, j, min;
+    ProcessInfo *swap;
+        for (i = 0; i < (tam-1); i++){
+            min = i;
+          
+            for (j = (i+1); j < tam; j++) {
+                if(processoInfo[j]->cpuPercentage > processoInfo[min]->cpuPercentage){
+                    min = j;
+                }
+            }
+            if (i != min) {
+              swap = processoInfo[i];
+              processoInfo[i] = processoInfo[min];
+              processoInfo[min] = swap;
+            }
+          
+        }
+}
+
+
+/*
 * Cria a array de processos
 */
 
@@ -245,13 +272,44 @@ struct ProcessInfo** listAllProcessesDirectory()
         strcat(directoryName,entry->d_name);
         strcat(directoryName, statFileName);
         processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
+        //printf("%lf\n", calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName));
         processInfoArrayIndex++;
+        selection_sort_decrescente(ptr, processInfoArrayIndex);
       }
     }
 
     return ptr;
 }
 
+
+struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray){
+    struct dirent *entry;
+    DIR *pDir;
+    char directoryName[256] = "/proc";
+    char statFileName[256] = "/stat";
+    pDir = opendir(directoryName);
+    int processInfoArrayIndex = 0;
+
+    struct ProcessInfo** ptr = &processInfoArray[0];
+
+    processInfoArrayIndex = 0;
+    while((entry = readdir(pDir)) != NULL)
+    {
+      strcpy(directoryName, "/proc");
+      if(isdigit(entry->d_name[0]))
+      {
+        strcat(directoryName, "/");
+        strcat(directoryName,entry->d_name);
+        strcat(directoryName, statFileName);
+        processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
+        //printf("%lf\n", calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName));
+        processInfoArrayIndex++;
+        selection_sort_decrescente(ptr, processInfoArrayIndex);
+      }
+    }
+    return ptr;
+
+}
 
 void* create_shared_memory(size_t size) 
 {

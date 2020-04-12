@@ -25,9 +25,13 @@ int main (void){
 	struct ProcessInfo **processInfo;
 
 	processInfo = listAllProcessesDirectory();
-
+   
   interface(processInfo);
-
+  while(1){
+    sleep(1);
+    recalculaCPU(processInfo);
+    showProcess(processInfo);
+  }
   return 0;
 }
 

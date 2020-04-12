@@ -3,5 +3,6 @@
 
 struct ProcessInfo** listAllProcessesDirectory(void);
 
+struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray);
 
 #endif
