@@ -15,25 +15,15 @@ typedef struct ProcessInfo
   char userName[99];
   int priority;
   char state;
-  int cpuPercentage;
+  double cpuPercentage;
   long int startTime;
+  double sTime;
+  double uTime;
+  double sum;
   string commandLine;
 }ProcessInfo;
 
-void header(){
-	ProcessInfo *p;
-	
-	p = (ProcessInfo *)calloc(1, sizeof(ProcessInfo));
-	
-	p->processID = 5;
-	strcpy(p->userName, "Felipe");
-	p->priority = 8;
-	p->state = 'S';
-	p->cpuPercentage = 10;
-	p->startTime = 20;
-	strcpy(p->commandLine, "teste");
-	
-	
+void header(){	
     printw("MyTop\n");
     printw("-----------------------------------------------------------\n");
     printw("PID\tUSER\tPR\tS\t%%CPU\tTIME\tCOMMAND\n");
@@ -53,10 +43,10 @@ void background(){
 }
 
 void showProcess(struct ProcessInfo** processInfo){
-   for(int i = 0; i < 200; i++){
-        printw("%d\t%s\t%d\t%c\t\t\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state, processInfo[i]->commandLine);
+   for(int i = 0; i < 3; i++){
+        printw("%d\t%s\t%d\t%c\t%0.2lf\t\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
+                                                        processInfo[i]->cpuPercentage, processInfo[i]->commandLine);
     }
-
 }
 
 void interface(struct ProcessInfo** processInfo){

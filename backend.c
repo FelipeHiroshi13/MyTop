@@ -23,8 +23,11 @@ typedef struct ProcessInfo
   char userName[99];
   int priority;
   char state;
-  int cpuPercentage;
+  double cpuPercentage;
   long int startTime;
+  double sTime;
+  double uTime;
+  double sum;
   string commandLine;
 }ProcessInfo;
 
@@ -37,67 +40,94 @@ int comp (const void * a, const void * b)
 }
 
 /*
+* Funcao para deslocar na posicao certa do documento
+*/
+void  desloca(int n, FILE *processFile){
+  char trash [256];
+  for(int i = 0; i < n; i++){
+    fscanf(processFile,"%s", trash);
+  }
+}
+
+/*
 * Calcula o tempo do um processo no CPU (sTime)
 * Calcula o tempo de processo do user (uTime)
 * sum Soma de todas as linhas da CPU 
 */
 
 void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, double *sum){
-  char trash[256];
-  fscanf(fp,"%s", trash);
+  char value[256];
+  fscanf(fp,"%s", value);
   for (int i = 0; i < 4; i++)
     {
-      fscanf(fp,"%s", trash);
-      *sum += atoi(trash);
+      fscanf(fp,"%s", value);
+      *sum += atoi(value);
     }
 
-    for (int i = 0; i < 13; i++)
-    {
-      fscanf(processFile,"%s", trash);
-    }
+    fseek(processFile, 14*sizeof(char), SEEK_SET);
 
     fscanf(processFile,"%lf", &(*uTime));
     fscanf(processFile,"%lf", &(*sTime));
 
     fclose(fp);
     fclose(processFile);
-
 }
+
 
 /*
 * Calcula a porcentagem da CPU em cada processo
 */
 
-int CalculateCpuPercentage(string finalDirectoryName)
+void calculateInicialTimers(struct ProcessInfo *processInfo, string finalDirectoryName)
+{
+  FILE* fp = fopen("/proc/stat","r");
+  FILE* processFile = fopen(finalDirectoryName,"r");
+
+  double sum = 0;
+  double sTimeBefore = 0, uTimeBefore = 0;
+
+
+  calculateTime(fp, processFile, &sTimeBefore, &uTimeBefore, &sum);
+
+  (*processInfo).sTime = sTimeBefore;
+  (*processInfo).uTime = uTimeBefore;
+  (*processInfo).sum = sum;
+
+}
+
+/*
+* Calcula a porcentagem final de cada processo, no qual é preciso calcular os valores 
+* iniciais com calculateInicialTimers e retorna a porcentagem.
+*
+*/
+
+double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirectoryName)
 {
   int nb = sysconf(_SC_NPROCESSORS_ONLN);
   double finalPercentage;
   FILE* fp = fopen("/proc/stat","r");
   FILE* processFile = fopen(finalDirectoryName,"r");
-  ///char str[100];
-  char* token;
+
   double sum = 0, lastSum = 0;
-  double sTimeAfter = 0, sTimeBefore = 0;
-  double uTimeAfter = 0, uTimeBefore = 0;
-
-  //const char d[2] = " ";
-
+  double sTimeBefore = 0, uTimeBefore = 0;
+  double sTimeAfter = 0, uTimeAfter = 0;
+  
   calculateTime(fp, processFile, &sTimeAfter, &uTimeAfter, &sum);
 
-  sleep(1);
+  sTimeBefore = (*processInfo).sTime;
+  uTimeBefore = (*processInfo).uTime;
+  lastSum = (*processInfo).sum;
 
-  fp = fopen("/proc/stat","r");
-  processFile = fopen(finalDirectoryName,"r");
+  finalPercentage = (100 * ((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore)/ (lastSum - sum)));
 
-  calculateTime(fp, processFile, &sTimeBefore, &uTimeBefore, &lastSum);
-
-  finalPercentage = nb*(100 * (((sTimeAfter + uTimeAfter) - (sTimeBefore + uTimeBefore)) / (sum - lastSum)));
-
-  if(strcmp(finalDirectoryName, "/proc/824/stat") == 0)
-    printf("%.2lf\n", finalPercentage);
   return finalPercentage;
+
 }
 
+/*
+* Pega o uid do arquivo status de cada processo para localizar o userName
+*
+*/
 char * getUid(char directoryName[256]){
   FILE *processInfoFile;
   struct passwd pd;
@@ -109,18 +139,16 @@ char * getUid(char directoryName[256]){
   char uid[50];
 
   strcat(directoryName, "/status");
-  printf("%s\n", directoryName);
   processInfoFile = fopen(directoryName, "r");
-  for (int i = 0; i < 20; i++)
-  {
-    fscanf(processInfoFile,"%s", trash);
-  }
+  
+  desloca(20, processInfoFile);
   fscanf(processInfoFile,"%s", uid);
 
-  getpwuid_r(1000,pwdptr,pwdbuffer,pwdlinelen,&tempPwdPtr);
+  getpwuid_r(uid,pwdptr,pwdbuffer,pwdlinelen,&tempPwdPtr);
   return pd.pw_name;
   
 }
+
 
 /*
 * Realiza uma leitura de cada informacao do processo
@@ -131,19 +159,17 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
   FILE *processInfoFile;
   char finalDirectoryName[256] = "";
   char directoryStatus[256] = "";
-  char trash[256];
   //char buffer;
   strcat(finalDirectoryName, directoryName);
   strcat(finalDirectoryName, "/");
   strcat(finalDirectoryName,entry->d_name);
 
   strcpy(directoryStatus, finalDirectoryName);
-
   strcpy((*processInfo).userName, getUid(directoryStatus));
-
+  
   strcat(finalDirectoryName,statFileName);
 
-  //CalculateCpuPercentage(finalDirectoryName);
+  calculateInicialTimers(processInfo, directoryName);
  
   processInfoFile = fopen(finalDirectoryName, "r");
 
@@ -154,26 +180,15 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
   fscanf(processInfoFile,"%s", (*processInfo).commandLine);
   fscanf(processInfoFile," %c", &(*processInfo).state);
 
-  for (int i = 0; i < 14; i++)
-  {
-    fscanf(processInfoFile,"%s", trash);
-  }
-
+  desloca(14, processInfoFile);
 
   fscanf(processInfoFile,"%d", &(*processInfo).priority);
-  //printf("%d\n", (*processInfo).priority);
 
-  for (int i = 0; i < 3; i++)
-  {
-    fscanf(processInfoFile,"%s", trash);
-  }
+  desloca(3, processInfoFile);
 
   fscanf(processInfoFile,"%ld", &(*processInfo).startTime);
-
-  //printf("%ld\n", processInfo->startTime);
   
   processInfo->startTime /= sysconf(_SC_CLK_TCK);
-  
   
   time_t curTime; 
   curTime = time(NULL); 
@@ -203,6 +218,7 @@ struct ProcessInfo** listAllProcessesDirectory()
 
     char directoryName[256] = "/proc";
     char statFileName[256] = "/stat";
+
     
     pDir = opendir(directoryName);
     int processInfoArrayIndex = 0;
@@ -215,6 +231,24 @@ struct ProcessInfo** listAllProcessesDirectory()
         processInfoArrayIndex++;
       }
     }
+
+    sleep(1);
+
+    pDir = opendir(directoryName);
+    processInfoArrayIndex = 0;
+    while((entry = readdir(pDir)) != NULL)
+    {
+      strcpy(directoryName, "/proc");
+      if(isdigit(entry->d_name[0]))
+      {
+        strcat(directoryName, "/");
+        strcat(directoryName,entry->d_name);
+        strcat(directoryName, statFileName);
+        processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
+        processInfoArrayIndex++;
+      }
+    }
+
     return ptr;
 }
 

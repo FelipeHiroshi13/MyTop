@@ -13,8 +13,11 @@ typedef struct ProcessInfo
   char userName[99];
   int priority;
   char state;
-  int cpuPercentage;
+  double cpuPercentage;
   long int startTime;
+  double sTime;
+  double uTime;
+  double sum;
   string commandLine;
 }ProcessInfo;
 
