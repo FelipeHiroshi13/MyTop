@@ -23,7 +23,7 @@ int main (void){
 
 	processInfo = listAllProcessesDirectory();
 
-  //interface(processInfo);
+  interface(processInfo);
 
   return 0;
 }

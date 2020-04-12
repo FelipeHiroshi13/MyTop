@@ -38,7 +38,6 @@ void header(){
     printw("-----------------------------------------------------------\n");
     printw("PID\tUSER\tPR\tS\t%%CPU\tTIME\tCOMMAND\n");
     printw("-----------------------------------------------------------\n");
-    printw("%i\t %s\t %i\t %c\t %i\t %i\t %s\n", (*p).processID, p->userName, p->priority, p->state, p->cpuPercentage, p->startTime, p->commandLine);
 }
 
 void background(){
@@ -54,8 +53,8 @@ void background(){
 }
 
 void showProcess(struct ProcessInfo** processInfo){
-   for(int i = 0; i < 5; i++){
-        printw("%d\t\t%d\t%c\t\t\t%s\n", processInfo[i]->processID, processInfo[i]->priority, processInfo[i]->state, processInfo[i]->commandLine);
+   for(int i = 0; i < 200; i++){
+        printw("%d\t%s\t%d\t%c\t\t\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state, processInfo[i]->commandLine);
     }
 
 }

@@ -18,7 +18,7 @@ BU = ./build
 CC_FLAGS=-c         \
          -W         \
          -Wall     	\
-		 -std=c99   \
+		 -std=gnu99 \
 		 -pedantic 
 
 
