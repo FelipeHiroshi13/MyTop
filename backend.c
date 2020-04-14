@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <ncurses.h>
+﻿#include <ncurses.h>
 #include <dirent.h>
 #include <string.h>
 #include <ctype.h>
@@ -24,7 +23,7 @@ typedef struct ProcessInfo
   int priority;
   char state;
   double cpuPercentage;
-  long int startTime;
+  double startTime;
   double sTime;
   double uTime;
   double sum;
@@ -59,18 +58,20 @@ void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, do
   char value[256];
   fscanf(fp,"%s", value);
   for (int i = 0; i < 4; i++)
-    {
-      fscanf(fp,"%s", value);
-      *sum += atoi(value);
-    }
+  {
+    fscanf(fp,"%s", value);
+    *sum += (double)(atoi(value));
+  }
+  
 
-    fseek(processFile, 14*sizeof(char), SEEK_SET);
+  //fseek(processFile, 14*sizeof(char), SEEK_SET);
+  desloca(13, processFile);
+  
+  fscanf(processFile,"%lf", &(*uTime));
+  fscanf(processFile,"%lf", &(*sTime));
 
-    fscanf(processFile,"%lf", &(*uTime));
-    fscanf(processFile,"%lf", &(*sTime));
-
-    fclose(fp);
-    fclose(processFile);
+  fclose(fp);
+  fclose(processFile);
 }
 
 
@@ -101,24 +102,54 @@ void calculateInicialTimers(struct ProcessInfo *processInfo, string finalDirecto
 *
 */
 
+void CalculateProcessExecutionTime(struct ProcessInfo *processInfo, string finalDirectoryName)
+{
+  FILE* processFile = fopen(finalDirectoryName,"r");
+  FILE* uptimeFile = fopen("/proc/uptime", "r");
+  double upTimeFile;
+  double processStartTime;
+
+  fscanf(uptimeFile,"%lf", &upTimeFile);
+
+  desloca(21, processFile);
+
+  fscanf(processFile,"%lf", &processStartTime);
+
+  (*processInfo).startTime = upTimeFile - (processStartTime/sysconf(_SC_CLK_TCK));
+
+}
+
 double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirectoryName)
 {
   int nb = sysconf(_SC_NPROCESSORS_ONLN);
   double finalPercentage;
   FILE* fp = fopen("/proc/stat","r");
   FILE* processFile = fopen(finalDirectoryName,"r");
-
   double sum = 0, lastSum = 0;
   double sTimeBefore = 0, uTimeBefore = 0;
   double sTimeAfter = 0, uTimeAfter = 0;
-  
+
   calculateTime(fp, processFile, &sTimeAfter, &uTimeAfter, &sum);
+
+  CalculateProcessExecutionTime(processInfo, finalDirectoryName);
+
+  //fscanf(processFile,"%lf", &test);
+
+  //(*processInfo).startTime -= test;
+    //(*processInfo).startTime /= sysconf(_SC_CLK_TCK);
 
   sTimeBefore = (*processInfo).sTime;
   uTimeBefore = (*processInfo).uTime;
   lastSum = (*processInfo).sum;
 
-  finalPercentage = (100 * ((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore)/ (lastSum - sum)));
+  finalPercentage = nb * ((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/ (lastSum - sum);
+
+  //printf("Before %s uTime:%lf\n", finalDirectoryName, uTimeBefore);
+  //printf("Before %s sTime:%lf\n", finalDirectoryName, sTimeBefore);
+  //printf("After %s uTime:%lf\n", finalDirectoryName, uTimeAfter);
+  //printf("After %s sTime:%lf\n", finalDirectoryName, sTimeAfter);
+  //printf("%.2lf\n", sum);
+  //printf("%.2lf\n", lastSum);
 
   return finalPercentage;
 
@@ -143,8 +174,9 @@ char * getUid(char directoryName[256]){
   
   desloca(20, processInfoFile);
   fscanf(processInfoFile,"%s", uid);
+  //printf("%s\n", uid);
 
-  getpwuid_r(uid,pwdptr,pwdbuffer,pwdlinelen,&tempPwdPtr);
+  getpwuid_r(atoi(uid),pwdptr,pwdbuffer,pwdlinelen,&tempPwdPtr);
   return pd.pw_name;
   
 }
@@ -169,7 +201,7 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
   
   strcat(finalDirectoryName,statFileName);
 
-  calculateInicialTimers(processInfo, directoryName);
+  calculateInicialTimers(processInfo, finalDirectoryName);
  
   processInfoFile = fopen(finalDirectoryName, "r");
 
@@ -186,15 +218,8 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
   desloca(3, processInfoFile);
 
-  fscanf(processInfoFile,"%ld", &(*processInfo).startTime);
-  
-  processInfo->startTime /= sysconf(_SC_CLK_TCK);
-  
-  time_t curTime; 
-  curTime = time(NULL); 
-  //printf("%ld\n", curTime);
-  curTime -= processInfo->startTime;
-  processInfo->startTime = curTime;
+  //fscanf(processInfoFile,"%ld", &(*processInfo).startTime);
+
 
   fclose(processInfoFile);
 
@@ -287,6 +312,8 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray){
     DIR *pDir;
     char directoryName[256] = "/proc";
     char statFileName[256] = "/stat";
+    //deeeee
+    //printf("-->%s\n", directoryName);    
     pDir = opendir(directoryName);
     int processInfoArrayIndex = 0;
 
@@ -305,8 +332,11 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray){
         //printf("%lf\n", calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName));
         processInfoArrayIndex++;
         selection_sort_decrescente(ptr, processInfoArrayIndex);
+        
+        
       }
-    }
+
+      directoryName[0] = '\0';    }
     return ptr;
 
 }
