@@ -3,10 +3,12 @@
 
 void background(void);
 
-void interface(struct ProcessInfo** processInfo);
+void interface(struct ProcessInfo** processInfo, int sizeofProcess);
 
 void showProcess(struct ProcessInfo** processInfo);
 
 void header(void);
+
+void showsizeProcess(int sizeofProcess);
 
 #endif

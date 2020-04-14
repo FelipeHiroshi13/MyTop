@@ -24,7 +24,7 @@ typedef struct ProcessInfo
 }ProcessInfo;
 
 void header(){	
-    printw("MyTop\n");
+    move(2,0);
     printw("-----------------------------------------------------------\n");
     printw("PID\tUSER\tPR\tS\t%%CPU\tTIME\tCOMMAND\n");
     printw("-----------------------------------------------------------\n");
@@ -42,8 +42,15 @@ void background(){
     bkgd (COLOR_PAIR(FUNDO));
 }
 
+void showsizeProcess(int sizeofProcess){
+    move(0,0);
+    printw("MyTop\n");
+    printw("Tarefas: %d total\n",sizeofProcess);
+    clrtoeol();
+}
+
 void showProcess(struct ProcessInfo** processInfo){
-    move(4,0);
+    move(5,0);
     clrtoeol();
     for(int i = 0; i < 15; i++){
         printw("%d\t%s\t%d\t%c\t%0.2lf\t%0.lf\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
@@ -53,9 +60,10 @@ void showProcess(struct ProcessInfo** processInfo){
     refresh();
 }
 
-void interface(struct ProcessInfo** processInfo){
+void interface(struct ProcessInfo** processInfo, int sizeofProcess){
     initscr();
     background();
+    showsizeProcess(sizeofProcess);
     header();
 
     showProcess(processInfo);

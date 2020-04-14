@@ -23,14 +23,21 @@ typedef struct ProcessInfo
 
 int main (void){
 	struct ProcessInfo **processInfo;
+  int sizeListProcess = 0;
 
-	processInfo = listAllProcessesDirectory();
-   
-  interface(processInfo);
+	// processInfo = listAllProcessesDirectory(&sizeListProcess); 
+  
+  // printf("%d\n", sizeListProcess);
+  //interface(processInfo,sizeListProcess);
+
   while(1){
-    processInfo = listAllProcessesDirectory();
-    recalculaCPU(processInfo);
-    showProcess(processInfo);
+    processInfo = listAllProcessesDirectory(&sizeListProcess); 
+    //printf("-->%d\n", sizeListProcess);
+    recalculaCPU(processInfo, &sizeListProcess);
+    interface(processInfo,sizeListProcess);
+    //showsizeProcess(sizeListProcess);
+    // processInfo = listAllProcessesDirectory(&sizeListProcess);
+    // recalculaCPU(processInfo, &sizeListProcess);
   }
   return 0;
 }
