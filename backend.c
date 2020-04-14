@@ -351,8 +351,6 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray){
         processInfoArrayIndex++;
         selection_sort_decrescente(ptr, processInfoArrayIndex);
         
-        
-        
       }
       directoryName[0] = '\0';
     }

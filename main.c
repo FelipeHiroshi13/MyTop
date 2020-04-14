@@ -14,7 +14,7 @@ typedef struct ProcessInfo
   int priority;
   char state;
   double cpuPercentage;
-  long int startTime;
+  double startTime;
   double sTime;
   double uTime;
   double sum;
@@ -28,7 +28,7 @@ int main (void){
    
   interface(processInfo);
   while(1){
-    sleep(1);
+    processInfo = listAllProcessesDirectory();
     recalculaCPU(processInfo);
     showProcess(processInfo);
   }

@@ -16,7 +16,7 @@ typedef struct ProcessInfo
   int priority;
   char state;
   double cpuPercentage;
-  long int startTime;
+  double startTime;
   double sTime;
   double uTime;
   double sum;
@@ -46,8 +46,9 @@ void showProcess(struct ProcessInfo** processInfo){
     move(4,0);
     clrtoeol();
     for(int i = 0; i < 15; i++){
-        printw("%d\t%s\t%d\t%c\t%0.2lf\t\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
-                                                        processInfo[i]->cpuPercentage, processInfo[i]->commandLine);
+        printw("%d\t%s\t%d\t%c\t%0.2lf\t%0.lf\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
+                                                        processInfo[i]->cpuPercentage,
+                                                        processInfo[i]->startTime, processInfo[i]->commandLine);
     }
     refresh();
 }
