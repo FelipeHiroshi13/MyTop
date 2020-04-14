@@ -54,9 +54,13 @@ void  desloca(int n, FILE *processFile){
 * sum Soma de todas as linhas da CPU 
 */
 
-void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, double *sum){
+void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, double *sum)
+{
   char value[256];
+  //printf("calculateTimeTest1\n");
+  //printf("%s\n", fp);
   fscanf(fp,"%s", value);
+  //printf("calculateTimeTest2\n");
   for (int i = 0; i < 4; i++)
   {
     fscanf(fp,"%s", value);
@@ -69,9 +73,7 @@ void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, do
   
   fscanf(processFile,"%lf", &(*uTime));
   fscanf(processFile,"%lf", &(*sTime));
-
-  fclose(fp);
-  fclose(processFile);
+  //printf("calculateTimeTest3\n");
 }
 
 
@@ -93,6 +95,8 @@ void calculateInicialTimers(struct ProcessInfo *processInfo, string finalDirecto
   (*processInfo).sTime = sTimeBefore;
   (*processInfo).uTime = uTimeBefore;
   (*processInfo).sum = sum;
+  fclose(fp);
+  fclose(processFile);
 
 }
 
@@ -117,6 +121,9 @@ void CalculateProcessExecutionTime(struct ProcessInfo *processInfo, string final
 
   (*processInfo).startTime = upTimeFile - (processStartTime/sysconf(_SC_CLK_TCK));
 
+  fclose(processFile);
+  fclose(uptimeFile);
+
 }
 
 double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirectoryName)
@@ -128,11 +135,11 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   double sum = 0, lastSum = 0;
   double sTimeBefore = 0, uTimeBefore = 0;
   double sTimeAfter = 0, uTimeAfter = 0;
+  //printf("kek3\n");
+
 
   calculateTime(fp, processFile, &sTimeAfter, &uTimeAfter, &sum);
-
   CalculateProcessExecutionTime(processInfo, finalDirectoryName);
-
   //fscanf(processFile,"%lf", &test);
 
   //(*processInfo).startTime -= test;
@@ -142,7 +149,7 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   uTimeBefore = (*processInfo).uTime;
   lastSum = (*processInfo).sum;
 
-  finalPercentage = nb * ((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/ (lastSum - sum);
+  finalPercentage = nb * 100 * (((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/ sysconf(_SC_CLK_TCK)) / (lastSum - sum);
 
   //printf("Before %s uTime:%lf\n", finalDirectoryName, uTimeBefore);
   //printf("Before %s sTime:%lf\n", finalDirectoryName, sTimeBefore);
@@ -150,6 +157,9 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   //printf("After %s sTime:%lf\n", finalDirectoryName, sTimeAfter);
   //printf("%.2lf\n", sum);
   //printf("%.2lf\n", lastSum);
+
+  fclose(fp);
+  fclose(processFile);
 
   return finalPercentage;
 
@@ -177,6 +187,7 @@ char * getUid(char directoryName[256]){
   //printf("%s\n", uid);
 
   getpwuid_r(atoi(uid),pwdptr,pwdbuffer,pwdlinelen,&tempPwdPtr);
+  fclose(processInfoFile);
   return pd.pw_name;
   
 }
@@ -283,7 +294,7 @@ struct ProcessInfo** listAllProcessesDirectory()
         processInfoArrayIndex++;
       }
     }
-
+    closedir(pDir);
     sleep(1);
 
     pDir = opendir(directoryName);
@@ -302,6 +313,9 @@ struct ProcessInfo** listAllProcessesDirectory()
         selection_sort_decrescente(ptr, processInfoArrayIndex);
       }
     }
+    closedir(pDir);
+    
+    
 
     return ptr;
 }
@@ -311,10 +325,13 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray){
     struct dirent *entry;
     DIR *pDir;
     char directoryName[256] = "/proc";
-    char statFileName[256] = "/stat";
-    //deeeee
-    //printf("-->%s\n", directoryName);    
+    char statFileName[10] = "/stat";
+    //printf("%s", directoryName);
+   
     pDir = opendir(directoryName);
+
+    
+
     int processInfoArrayIndex = 0;
 
     struct ProcessInfo** ptr = &processInfoArray[0];
@@ -328,15 +345,19 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray){
         strcat(directoryName, "/");
         strcat(directoryName,entry->d_name);
         strcat(directoryName, statFileName);
+        //printf("%s\n", directoryName);
         processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
         //printf("%lf\n", calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName));
         processInfoArrayIndex++;
         selection_sort_decrescente(ptr, processInfoArrayIndex);
         
         
+        
       }
+      directoryName[0] = '\0';
+    }
 
-      directoryName[0] = '\0';    }
+    closedir(pDir);
     return ptr;
 
 }
