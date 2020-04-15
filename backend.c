@@ -50,10 +50,9 @@ void  desloca(int n, FILE *processFile){
 void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, double *sum)
 {
   char value[256];
-  //printf("calculateTimeTest1\n");
-  //printf("%s\n", fp);
+
   fscanf(fp,"%s", value);
-  //printf("calculateTimeTest2\n");
+
   for (int i = 0; i < 4; i++)
   {
     fscanf(fp,"%s", value);
@@ -82,15 +81,15 @@ void calculateInicialTimers(struct ProcessInfo *processInfo, string finalDirecto
   double sum = 0;
   double sTimeBefore = 0, uTimeBefore = 0;
 
-
+  //fseek(processFile, 14*sizeof(char), SEEK_SET);
   calculateTime(fp, processFile, &sTimeBefore, &uTimeBefore, &sum);
 
   (*processInfo).sTime = sTimeBefore;
   (*processInfo).uTime = uTimeBefore;
   (*processInfo).sum = sum;
+  
   fclose(fp);
   fclose(processFile);
-
 }
 
 /*
@@ -112,7 +111,7 @@ void CalculateProcessExecutionTime(struct ProcessInfo *processInfo, string final
 
   fscanf(processFile,"%lf", &processStartTime);
 
-  (*processInfo).startTime = upTimeFile - (processStartTime/sysconf(_SC_CLK_TCK));
+  (*processInfo).startTime = (* processInfo).sTime + (*processInfo).uTime;
 
   fclose(processFile);
   fclose(uptimeFile);
@@ -128,35 +127,34 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   double sum = 0, lastSum = 0;
   double sTimeBefore = 0, uTimeBefore = 0;
   double sTimeAfter = 0, uTimeAfter = 0;
-  //printf("kek3\n");
-
-
-  
-  calculateTime(fp, processFile, &sTimeAfter, &uTimeAfter, &sum);
-  CalculateProcessExecutionTime(processInfo, finalDirectoryName);
-  //fscanf(processFile,"%lf", &test);
-
-  //(*processInfo).startTime -= test;
-    //(*processInfo).startTime /= sysconf(_SC_CLK_TCK);
 
   sTimeBefore = (*processInfo).sTime;
   uTimeBefore = (*processInfo).uTime;
   lastSum = (*processInfo).sum;
+
   
+  calculateTime(fp, processFile, &sTimeAfter, &uTimeAfter, &sum);
 
-  //finalPercentage = nb * 100 * (((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/sysconf(_SC_CLK_TCK)) / (lastSum - sum);
+  CalculateProcessExecutionTime(processInfo, finalDirectoryName);
+  
+  // printf("Before %s uTime:%lf\n", finalDirectoryName, uTimeBefore);
+  // printf("Before %s sTime:%lf\n", finalDirectoryName, sTimeBefore);
 
-  finalPercentage = 2 * nb * (((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/ sysconf(_SC_CLK_TCK)) / (lastSum - sum);
+  finalPercentage = nb * 100 * (((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/sysconf(_SC_CLK_TCK)) / (lastSum - sum);
 
-  // if(processInfo->processID == 2741){
-  //   printf("Before %s uTime:%lf\n", finalDirectoryName, uTimeBefore);
-  //   printf("Before %s sTime:%lf\n", finalDirectoryName, sTimeBefore);
-  //   printf("After %s uTime:%lf\n", finalDirectoryName, uTimeAfter);
-  //   printf("After %s sTime:%lf\n", finalDirectoryName, sTimeAfter);
-  //   printf("sum: %.2lf\n", sum);
-  //   printf("last sum: %.2lf\n", lastSum);
-  //   printf("final : %.2lf\n", finalPercentage);
-  // }
+  // (*processInfo).sTime = sTimeAfter;
+  // (*processInfo).uTime = uTimeAfter;
+  // (*processInfo).sum = lastSum;
+
+  //finalPercentage = 2 * nb * (((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/ sysconf(_SC_CLK_TCK)) / (lastSum - sum);
+
+  
+  // printf("After %s uTime:%lf\n", finalDirectoryName, uTimeAfter);
+  // printf("After %s sTime:%lf\n", finalDirectoryName, sTimeAfter);
+  // printf("sum: %.2lf\n", sum);
+  // printf("last sum: %.2lf\n", lastSum);
+  // printf("final : %.2lf\n", finalPercentage);
+
   fclose(fp);
   fclose(processFile);
 
@@ -243,7 +241,6 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 * Ordena os processos de acordo com a % de CPU
 *
 */
-
 void selection_sort_decrescente(struct ProcessInfo ** processoInfo, int tam) {
   
     int i, j, min;
@@ -308,15 +305,14 @@ struct ProcessInfo** listAllProcessesDirectory(int * sizlistProcess)
       {
         struct ProcessInfo *processInfo = malloc (sizeof (ProcessInfo));
         processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, directoryName, statFileName, entry);
+        //printf("-> %d %lf\n", processInfoArray[processInfoArrayIndex]->processID, processInfoArray[processInfoArrayIndex]->uTime);
         processInfoArrayIndex++;
       }
     }
 
     (*sizlistProcess) = processInfoArrayIndex;
-    closedir(pDir);
-    sleep(1);
+    
 
-    //printf("%d-->%d\n", sizeProcess(ptr), (*sizlistProcess));
     while(sizeProcess() != (*sizlistProcess)){
       int processInfoArrayIndex = 0;
 
@@ -337,20 +333,23 @@ struct ProcessInfo** listAllProcessesDirectory(int * sizlistProcess)
       sleep(1);
     }
 
-    pDir = opendir(directoryName);
+    closedir(pDir);
+    sleep(1);
+    pDir = opendir("/proc");
+
     processInfoArrayIndex = 0;
     while((entry = readdir(pDir)) != NULL)
     {
       strcpy(directoryName, "/proc");
       if(isdigit(entry->d_name[0]))
       {
+        //printf("-->lista\n");
         strcat(directoryName, "/");
         strcat(directoryName,entry->d_name);
         strcat(directoryName, statFileName);     
         processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
-        //printf("%lf\n", calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName));  
+        //printf("-----> %d %lf\n", processInfoArray[processInfoArrayIndex]->processID, processInfoArray[processInfoArrayIndex]->uTime);
         processInfoArrayIndex++;
-        selection_sort_decrescente(ptr, processInfoArrayIndex);
       }
     }
     closedir(pDir);
@@ -360,6 +359,59 @@ struct ProcessInfo** listAllProcessesDirectory(int * sizlistProcess)
     
     return ptr;
 }
+
+struct ProcessInfo** reListProcess(int * sizlistProcess)
+{
+    DIR *pDir;
+    struct dirent *entry;
+    struct ProcessInfo* processInfoArray[99999];
+    struct ProcessInfo** ptr = &processInfoArray[0];
+
+    char directoryName[256] = "/proc";
+    char statFileName[256] = "/stat";
+
+    int processInfoArrayIndex = 0;
+
+    pDir = opendir(directoryName);
+
+    while((entry = readdir(pDir)) != NULL)
+    {
+      if(isdigit(entry->d_name[0]))
+      {
+        struct ProcessInfo *processInfo = malloc (sizeof (ProcessInfo));
+        processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, directoryName, statFileName, entry);
+        //printf("-> %d %lf\n", processInfoArray[processInfoArrayIndex]->processID, processInfoArray[processInfoArrayIndex]->uTime);
+        processInfoArrayIndex++;
+      }
+    }
+
+    (*sizlistProcess) = processInfoArrayIndex;
+    
+
+    while(sizeProcess() != (*sizlistProcess)){
+      int processInfoArrayIndex = 0;
+
+      pDir = opendir("/proc");
+
+      while((entry = readdir(pDir)) != NULL)
+      {
+        if(isdigit(entry->d_name[0]))
+        {
+          struct ProcessInfo *processInfo = malloc (sizeof (ProcessInfo));
+          processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, directoryName, statFileName, entry);
+          processInfoArrayIndex++;
+        }
+      }
+
+      (*sizlistProcess) = processInfoArrayIndex;
+      closedir(pDir);
+      sleep(1);
+    }
+
+
+    return ptr;
+}
+
 
 
 struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int * sizlistProcess){
@@ -386,36 +438,19 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int *
           strcat(directoryName, "/");
           strcat(directoryName,entry->d_name);
           strcat(directoryName, statFileName);
-          if(sizeProcess(ptr) == (*sizlistProcess)){
-            //printf("%s\n", directoryName);
-            processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
-            //printf("%lf\n", calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName));
-            processInfoArrayIndex++;
-            selection_sort_decrescente(ptr, processInfoArrayIndex);
-          }
+          processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
+          ///printf("-----> %d %lf\n", processInfoArray[processInfoArrayIndex]->processID, processInfoArray[processInfoArrayIndex]->uTime);
+          processInfoArrayIndex++;
         }
       directoryName[0] = '\0';
     }
+
+    selection_sort_decrescente(ptr, processInfoArrayIndex);
 
     (*sizlistProcess) = processInfoArrayIndex;
     closedir(pDir);
     return ptr;
 
-}
-
-void* create_shared_memory(size_t size) 
-{
-  // Our memory buffer will be readable and writable:
-  int protection = PROT_READ | PROT_WRITE;
-
-  // The buffer will be shared (meaning other processes can access it), but
-  // anonymous (meaning third-party processes cannot obtain an address for it),
-  // so only this process and its children will be able to use it:
-  int visibility = MAP_SHARED | MAP_ANONYMOUS;
-
-  // The remaining parameters to `mmap()` are not important for this use case,
-  // but the manpage for `mmap` explains their purpose.
-  return mmap(NULL, size, protection, visibility, -1, 0);
 }
 
 

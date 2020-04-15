@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "backend.h"
 #include "interface.h"
 
@@ -25,19 +26,17 @@ int main (void){
 	struct ProcessInfo **processInfo;
   int sizeListProcess = 0;
 
-	// processInfo = listAllProcessesDirectory(&sizeListProcess); 
-  
-  // printf("%d\n", sizeListProcess);
-  //interface(processInfo,sizeListProcess);
+  processInfo = listAllProcessesDirectory(&sizeListProcess); 
 
   while(1){
-    processInfo = listAllProcessesDirectory(&sizeListProcess); 
-    //printf("-->%d\n", sizeListProcess);
+   
+    sleep(1);
     recalculaCPU(processInfo, &sizeListProcess);
     interface(processInfo,sizeListProcess);
+    //processInfo = reListProcess(&sizeListProcess);
     //showsizeProcess(sizeListProcess);
     // processInfo = listAllProcessesDirectory(&sizeListProcess);
-    // recalculaCPU(processInfo, &sizeListProcess);
+    //recalculaCPU(processInfo, &sizeListProcess);
   }
   return 0;
 }

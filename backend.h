@@ -5,4 +5,6 @@ struct ProcessInfo** listAllProcessesDirectory(int *sizeLisProcess);
 
 struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int *sizeLisProcess);
 
+struct ProcessInfo** reListProcess(int * sizlistProcess);
+
 #endif

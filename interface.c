@@ -50,12 +50,19 @@ void showsizeProcess(int sizeofProcess){
 }
 
 void showProcess(struct ProcessInfo** processInfo){
+    int sec, h, m, s;
+    
     move(5,0);
     clrtoeol();
+
     for(int i = 0; i < 15; i++){
-        printw("%d\t%s\t%d\t%c\t%0.2lf\t%0.lf\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
+        sec = processInfo[i]->startTime;
+	    h = (sec/3600); 
+	    m = (sec -(3600*h))/60;
+	    s = (sec -(3600*h)-(m*60));
+        printw("%d\t%s\t%d\t%c\t%0.2lf\t%d:%d:%d\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
                                                         processInfo[i]->cpuPercentage,
-                                                        processInfo[i]->startTime, processInfo[i]->commandLine);
+                                                        h, m, s, processInfo[i]->commandLine);
     }
     refresh();
 }
