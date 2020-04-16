@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 #include<ncurses.h>
 #include<stdlib.h>
 
@@ -6,9 +7,24 @@
 #define COR_MENU 2  
 #define CURSOR   3
 
+typedef char string[256];
 
-void header(){
-    printw("MyTop\n");
+typedef struct ProcessInfo
+{
+  int processID;
+  char userName[99];
+  int priority;
+  char state;
+  double cpuPercentage;
+  double startTime;
+  double sTime;
+  double uTime;
+  double sum;
+  string commandLine;
+}ProcessInfo;
+
+void header(){	
+    move(2,0);
     printw("-----------------------------------------------------------\n");
     printw("PID\tUSER\tPR\tS\t%%CPU\tTIME\tCOMMAND\n");
     printw("-----------------------------------------------------------\n");
@@ -16,7 +32,6 @@ void header(){
 
 void background(){
     start_color();   
-    //definição de pares de cores para a interface
     init_pair(FUNDO,    COLOR_GREEN,   COLOR_BLACK);
     init_pair(COR_MENU, COLOR_BLUE,   COLOR_YELLOW);
     init_pair(CURSOR,   COLOR_YELLOW, COLOR_BLUE);
@@ -27,15 +42,42 @@ void background(){
     bkgd (COLOR_PAIR(FUNDO));
 }
 
-void interface(){
+void showsizeProcess(int sizeofProcess){
+    move(0,0);
+    printw("MyTop\n");
+    printw("Tarefas: %d total\n",sizeofProcess);
+    clrtoeol();
+}
+
+void showProcess(struct ProcessInfo** processInfo){
+    int sec, h, m, s;
+    
+    move(5,0);
+    clrtoeol();
+
+    for(int i = 0; i < 3; i++){
+        sec = processInfo[i]->startTime;
+	    h = (sec/3600); 
+	    m = (sec -(3600*h))/60;
+	    s = (sec -(3600*h)-(m*60));
+        printw("%d\t%s\t%d\t%c\t%0.2lf\t%d:%d:%d\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,
+                                                        processInfo[i]->cpuPercentage,
+                                                        h, m, s, processInfo[i]->commandLine);
+    }
+    refresh();
+}
+
+void interface(struct ProcessInfo** processInfo, int sizeofProcess){
     initscr();
     background();
+    showsizeProcess(sizeofProcess);
     header();
-    
+
+    showProcess(processInfo);
 
     refresh();
+}
 
-    getch();
-
+void finalizeInterface(){
     endwin();
 }

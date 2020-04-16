@@ -1,51 +1,43 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "backend.h"
 #include "interface.h"
 
-typedef char String[20];
+typedef char string[256];
 
-int main (int argc, char **argv){
-	FILE *fs, *fu; 		// pointers fileStat, fileUptime
-	String pathStat;	
-	String pathUptime;
-	
-	listAllProcessesDirectory();
-    interface();
-    
-	if(argc != 2){
-		printf("Error 1\n");
-	}
-	else{
-		strcpy(pathStat, (argv[1]));
-		strcpy(pathUptime, (argv[2]));
-		
-		fs = fopen(pathStat, "r");
-		
-		if(fs == NULL){
-			printf("Error 2\n");
-		}
-		else{
-			
-			// PID (find in stat[0])
-			
-			// USER
-			
-			// PR 
-			
-			// S (find in stat[1])
-			
-			// %CPU (this section need some calculus with stat[14:17, 22] and uptime[0])
-			
-			// TIME ( idem %cpu )
-			
-			// COMMAND (find in stat[2])
-			
-			fclose(fs);	
-		}
-	}
+typedef struct ProcessInfo
+{
+  int processID;
+  char userName[99];
+  int priority;
+  char state;
+  double cpuPercentage;
+  double startTime;
+  double sTime;
+  double uTime;
+  double sum;
+  string commandLine;
+}ProcessInfo;
 
-    return 0;
+int main (void){
+	struct ProcessInfo **processInfo;
+  int sizeListProcess = 0;
+
+  processInfo = listAllProcessesDirectory(&sizeListProcess); 
+
+  while(1){
+    processInfo = listAllProcessesDirectory(&sizeListProcess); 
+    recalculaCPU(processInfo, &sizeListProcess);
+    interface(processInfo,sizeListProcess);
+    //processInfo = reListProcess(&sizeListProcess);
+    //showsizeProcess(sizeListProcess);
+    // processInfo = listAllProcessesDirectory(&sizeListProcess);
+    //recalculaCPU(processInfo, &sizeListProcess);
+  }
+  return 0;
 }
 
 	

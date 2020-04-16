@@ -12,11 +12,13 @@ OBJ=$(C_SOURCE:.c=.o)
 
 # Compiler
 CC=gcc
+BU = ./build
 
 # Flags for compiler
 CC_FLAGS=-c         \
          -W         \
          -Wall     	\
+		 -std=gnu99 \
 		 -pedantic 
 
 
@@ -35,10 +37,8 @@ main.o: main.c $(H_SOURCE)
 %.o: %.c %.h
 	$(CC) -o $@ $< $(CC_FLAGS) 
 
-run: 
+run: ./$(PROJ_NAME)
 	./$(PROJ_NAME)
-	#chmod 777 script.sh
-	#./script.sh
 
 clean:
 	rm -rf *.o $(PROJ_NAME) *~
