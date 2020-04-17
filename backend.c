@@ -148,11 +148,11 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   uTimeBefore = (*processInfo).uTime;
   lastSum = (*processInfo).sum;
 
-  calculateTime(fp, processFile, &sTimeAfter, &sTimeAfter, &sum);
+  calculateTime(fp, processFile, &sTimeAfter, &uTimeAfter, &sum);
  
   CalculateProcessExecutionTime(processInfo, finalDirectoryName, &startime);
 
-  finalPercentage = nb * 100 * (((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore))/sysconf(_SC_CLK_TCK)) / (lastSum - sum);
+  finalPercentage = nb * 100 * ((sTimeAfter + uTimeAfter) - (sTimeBefore  + uTimeBefore)) / (sum - lastSum);
 
   (*processInfo).sTime = sTimeAfter;
   (*processInfo).uTime = uTimeAfter;
@@ -161,6 +161,13 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   fclose(fp);
   fclose(fupTime);
   fclose(processFile);
+    //  printf("Before %s uTime:%lf\n", finalDirectoryName, uTimeBefore);
+    // printf("Before %s sTime:%lf\n", finalDirectoryName, sTimeBefore);
+    // printf("After %s uTime:%lf\n", finalDirectoryName, uTimeAfter);
+    // printf("After %s sTime:%lf\n", finalDirectoryName, sTimeAfter);
+    // printf("sum: %.2lf\n", sum);
+    // printf("last sum: %.2lf\n", lastSum);
+    // printf("final : %.2lf\n", finalPercentage);
 
   return finalPercentage;
 }
