@@ -22,21 +22,17 @@ typedef struct ProcessInfo
   string commandLine;
 }ProcessInfo;
 
+
+
 int main (void){
 	struct ProcessInfo **processInfo;
   int sizeListProcess = 0;
 
-  processInfo = listAllProcessesDirectory(&sizeListProcess); 
-
   while(1){
-   
+    processInfo = listAllProcessesDirectory(&sizeListProcess); 
     sleep(1);
     recalculaCPU(processInfo, &sizeListProcess);
     interface(processInfo,sizeListProcess);
-    //processInfo = reListProcess(&sizeListProcess);
-    //showsizeProcess(sizeListProcess);
-    // processInfo = listAllProcessesDirectory(&sizeListProcess);
-    //recalculaCPU(processInfo, &sizeListProcess);
   }
   return 0;
 }
