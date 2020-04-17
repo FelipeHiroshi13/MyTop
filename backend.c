@@ -102,7 +102,6 @@ void CalculateProcessExecutionTime(struct ProcessInfo *processInfo, string final
   FILE* processFile = fopen(finalDirectoryName,"r");
   FILE* uptimeFile = fopen("/proc/uptime", "r");
   double upTime;
-  double time;
 
   fscanf(uptimeFile,"%lf", &upTime);
 
@@ -129,20 +128,16 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   double finalPercentage;
   FILE* fp = fopen("/proc/stat","r");
   FILE* processFile = fopen(finalDirectoryName,"r");
-  double sum = 0, lastSum = 0, sumSec;
+  double sum = 0, lastSum = 0;
   double sTimeBefore = 0, uTimeBefore = 0;
   double sTimeAfter = 0, uTimeAfter = 0;
   
   double uptime = 0;
-  double total_time = 0;
   long unsigned startime = 0;
-  double seconds = 0;
 
   FILE* fupTime = fopen("/proc/uptime","r");
 
   fscanf(fupTime, "%lf", &uptime);
-
- // printf("FINALL \n", uptime);
 
   sTimeBefore = (*processInfo).sTime;
   uTimeBefore = (*processInfo).uTime;
@@ -161,13 +156,6 @@ double calculateFinalTimers(struct ProcessInfo *processInfo, string finalDirecto
   fclose(fp);
   fclose(fupTime);
   fclose(processFile);
-    //  printf("Before %s uTime:%lf\n", finalDirectoryName, uTimeBefore);
-    // printf("Before %s sTime:%lf\n", finalDirectoryName, sTimeBefore);
-    // printf("After %s uTime:%lf\n", finalDirectoryName, uTimeAfter);
-    // printf("After %s sTime:%lf\n", finalDirectoryName, sTimeAfter);
-    // printf("sum: %.2lf\n", sum);
-    // printf("last sum: %.2lf\n", lastSum);
-    // printf("final : %.2lf\n", finalPercentage);
 
   return finalPercentage;
 }
@@ -190,7 +178,6 @@ char * getUid(char directoryName[256]){
   
   desloca(20, processInfoFile);
   fscanf(processInfoFile,"%s", uid);
-  //printf("%s\n", uid);
 
   getpwuid_r(atoi(uid),pwdptr,pwdbuffer,pwdlinelen,&tempPwdPtr);
   fclose(processInfoFile);
@@ -208,34 +195,34 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
   FILE *processInfoFile;
   char finalDirectoryName[256] = "";
   char directoryStatus[256] = "";
-  //char buffer;
+
   strcat(finalDirectoryName, directoryName);
   strcat(finalDirectoryName, "/");
   strcat(finalDirectoryName,entry->d_name);
 
+  //UserName
   strcpy(directoryStatus, finalDirectoryName);
   strcpy((*processInfo).userName, getUid(directoryStatus));
-  
+
   strcat(finalDirectoryName,statFileName);
 
   calculateInicialTimers(processInfo, finalDirectoryName);
  
   processInfoFile = fopen(finalDirectoryName, "r");
 
-  //fseek(processInfoFile, 3, processInfoFile);
   fscanf(processInfoFile,"%d", &(*processInfo).processID);
   
-  //printf("-->%d\n", processInfo->state);
+  //CommandLine
   fscanf(processInfoFile,"%s", (*processInfo).commandLine);
+  //State
   fscanf(processInfoFile," %c", &(*processInfo).state);
 
   desloca(14, processInfoFile);
 
+  //Priority
   fscanf(processInfoFile,"%d", &(*processInfo).priority);
 
   desloca(3, processInfoFile);
-
-  //fscanf(processInfoFile,"%ld", &(*processInfo).startTime);
 
 
   fclose(processInfoFile);
@@ -249,7 +236,6 @@ struct ProcessInfo* GetProcessInfo(struct ProcessInfo *processInfo, char directo
 
 /*
 * Ordena os processos de acordo com a % de CPU
-*
 */
 void selection_sort_decrescente(struct ProcessInfo ** processoInfo, int tam) {
   
@@ -272,6 +258,9 @@ void selection_sort_decrescente(struct ProcessInfo ** processoInfo, int tam) {
         }
 }
 
+/*
+* Retorna a quantidade de processos existentes
+*/
 int sizeProcess(){
   DIR *pDir;
   struct dirent *entry;
@@ -319,27 +308,6 @@ struct ProcessInfo** listAllProcessesDirectory(int * sizlistProcess)
     }
 
     (*sizlistProcess) = processInfoArrayIndex;
-    
-
-    while(sizeProcess() != (*sizlistProcess)){
-      int processInfoArrayIndex = 0;
-
-      pDir = opendir("/proc");
-
-      while((entry = readdir(pDir)) != NULL)
-      {
-        if(isdigit(entry->d_name[0]))
-        {
-          struct ProcessInfo *processInfo = malloc (sizeof (ProcessInfo));
-          processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, directoryName, statFileName, entry);
-          processInfoArrayIndex++;
-        }
-      }
-
-      (*sizlistProcess) = processInfoArrayIndex;
-      closedir(pDir);
-      sleep(1);
-    }
 
     closedir(pDir);
 
@@ -347,6 +315,40 @@ struct ProcessInfo** listAllProcessesDirectory(int * sizlistProcess)
     
     return ptr;
 }
+/*
+* Caso no meio do calculo de %cpu o usuario ou sistema abra um novo processo,
+* essa função irá adicioná-lo.
+*/
+
+
+struct ProcessInfo ** newProcess(struct ProcessInfo ** processInfoArray, int * sizlistProcess){
+    struct dirent *entry;
+    int processInfoArrayIndex = 0;
+    struct ProcessInfo** ptr = &processInfoArray[0];
+    DIR *pDir;
+
+    pDir = opendir("/proc");
+
+    while((entry = readdir(pDir)) != NULL)
+    {
+      if(isdigit(entry->d_name[0]))
+      {
+        struct ProcessInfo *processInfo = malloc (sizeof (ProcessInfo));
+        processInfoArray[processInfoArrayIndex] = GetProcessInfo(processInfo, "/proc", "/stat", entry);
+        processInfoArrayIndex++;
+      }
+    }
+
+    (*sizlistProcess) = processInfoArrayIndex;
+    closedir(pDir);
+    sleep(1);
+
+    return ptr;
+}
+
+/*
+* Recalcula calcula o valor final de %cpu, no qual é feito um sleep na main para ter o intervalo do cálculo.
+*/
 
 struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int * sizlistProcess){
     struct dirent *entry;
@@ -361,7 +363,13 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int *
 
     struct ProcessInfo** ptr = &processInfoArray[0];
 
-    processInfoArrayIndex = 0;
+    while(sizeProcess() != (*sizlistProcess)){
+      ptr =  newProcess(processInfoArray, sizlistProcess);
+    }
+
+
+    pDir = opendir("/proc");
+
     while((entry = readdir(pDir)) != NULL)
     {
       strcpy(directoryName, "/proc");
@@ -383,33 +391,3 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int *
     return ptr;
 
 }
-
-
-// void pidProcess() {
-  
-//   int parent_message = 33;  // parent process will write this message
-//   int child_message = 23; // child process will then write this one
-//   ProcessInfo processInfo[15];
-
-//   processInfo[0].priority = 10;
-
-//   void* shmem = create_shared_memory(sizeof(ProcessInfo*) * 15);
-
-//   memcpy(shmem, &processInfo[0], sizeof(ProcessInfo));
-  
-//   int pid = fork();
-
-//   if (pid == 0) 
-//   {
-//     printf("Child read: %d\n", ((ProcessInfo*)&shmem[0])->priority);
-//     processInfo[0].priority = 20;
-//     memcpy(shmem, &processInfo[0], sizeof(ProcessInfo));
-//     printf("Child wrote: %d\n", ((ProcessInfo*)&shmem[0])->priority);
-
-//   } else 
-//   {
-//     printf("Parent read: %d\n", ((ProcessInfo*)&shmem[0])->priority);
-//     sleep(1);
-//     printf("After 1s, parent read: %d\n", ((ProcessInfo*)&shmem[0])->priority);
-//   }
-// }

@@ -11,4 +11,6 @@ void header(void);
 
 void showsizeProcess(int sizeofProcess);
 
+void finalizeInterface(void);
+
 #endif
