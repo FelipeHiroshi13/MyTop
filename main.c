@@ -27,13 +27,16 @@ typedef struct ProcessInfo
 int main (void){
 	struct ProcessInfo **processInfo;
   int sizeListProcess = 0;
-
-  while(1){
+	char out;
+	
+  do{
     processInfo = listAllProcessesDirectory(&sizeListProcess); 
     sleep(1);
     recalculaCPU(processInfo, &sizeListProcess);
     interface(processInfo,sizeListProcess);
-  }
+    if( out == 'q')
+    	finalizeInterface();
+  }while(scanf(" %c", &out));
   return 0;
 }
 

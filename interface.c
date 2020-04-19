@@ -81,4 +81,5 @@ void interface(struct ProcessInfo** processInfo, int sizeofProcess){
 
 void finalizeInterface(){
     endwin();
+    exit(0);
 }
