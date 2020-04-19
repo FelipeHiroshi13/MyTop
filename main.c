@@ -3,8 +3,10 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ncurses.h>
 #include "backend.h"
 #include "interface.h"
+
 
 typedef char string[256];
 
@@ -34,9 +36,14 @@ int main (void){
     sleep(1);
     recalculaCPU(processInfo, &sizeListProcess);
     interface(processInfo,sizeListProcess);
-    if( out == 'q')
+    
+    nodelay(stdscr, TRUE);
+    if(out == 'q')
     	finalizeInterface();
-  }while(scanf(" %c", &out));
+    out = getch();
+    
+  }while(1);
+  
   return 0;
 }
 
