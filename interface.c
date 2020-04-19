@@ -63,7 +63,7 @@ void showProcess(struct ProcessInfo** processInfo){
 	    m = sec/60;
 	    s = (sec - (m*60));
         h = (int)sec % 100;
-        printw("%d\t%-0.6s\t%d\t%c\t%0.2lf\t%2d:%2d.%2d\t%s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,processInfo[i]->cpuPercentage, m, s, h, processInfo[i]->commandLine);
+        printw("%d\t%-0.6s\t%d\t%c\t%0.2lf\t%0.2d:%0.2d.%0.2d %s\n", processInfo[i]->processID, processInfo[i]->userName, processInfo[i]->priority, processInfo[i]->state,processInfo[i]->cpuPercentage, m, s, h, processInfo[i]->commandLine);
     }
     refresh();
 }
