@@ -26,7 +26,7 @@ NCURSES = -lncurses
 #
 # Compilation and linking
 #
-all: $(PROJ_NAME) run
+all: $(PROJ_NAME)
 
 $(PROJ_NAME): $(OBJ)
 	$(CC) -o $@ $^ -lncurses
