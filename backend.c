@@ -381,10 +381,10 @@ struct ProcessInfo ** recalculaCPU(struct ProcessInfo ** processInfoArray, int *
           processInfoArray[processInfoArrayIndex]->cpuPercentage = calculateFinalTimers(processInfoArray[processInfoArrayIndex], directoryName);
           processInfoArrayIndex++;
         }
+        selection_sort_decrescente(ptr, processInfoArrayIndex);
       directoryName[0] = '\0';
     }
 
-    selection_sort_decrescente(ptr, processInfoArrayIndex);
 
     (*sizlistProcess) = processInfoArrayIndex;
     closedir(pDir);
