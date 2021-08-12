@@ -50,6 +50,7 @@ void  desloca(int n, FILE *processFile){
 void calculateTime(FILE *fp, FILE *processFile, double *sTime, double *uTime, double *sum)
 {
   char value[256];
+  char teste;
 
   fscanf(fp,"%s", value);
 
